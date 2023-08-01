@@ -1,2 +1,7 @@
 dev:
+	gcc -o main main.c 
+	main.exe
+
+run:
 	gcc -o main main.c
+	main.exe
