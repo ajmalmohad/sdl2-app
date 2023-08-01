@@ -1,6 +1,0 @@
-dev:
-	gcc -o main main.c -municode
-
-run:
-	gcc -o main main.c
-	main.exe
