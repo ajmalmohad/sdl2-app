@@ -1,29 +1,28 @@
 #include <SDL.h>
 #include <iostream>
+#include <vector>
 
 const int SCREEN_WIDTH = 640;
 const int SCREEN_HEIGHT = 480;
 
+bool initSDL(SDL_Window* &window, SDL_Surface* &screenSurface);
+bool loadMedia(SDL_Surface* &helloWorld, char* filePath);
+void close(SDL_Window* &window, std::vector<SDL_Surface*> &surfaces);
+
 int main( int argc, char* args[] ){
-	
 	SDL_Window* window = NULL;
 	SDL_Surface* screenSurface = NULL;
-	// You can't call any SDL functions without initializing SDL first.
-	// Since all we care about is using SDL's video subsystem, we will only be passing it the SDL_INIT_VIDEO flag.
-	if( SDL_Init( SDL_INIT_VIDEO ) < 0 ){
-		std::cout<<"SDL could not initialize! SDL_Error: "<<SDL_GetError()<<"\n";
-	}else{
-		window = SDL_CreateWindow( "SDL Tutorial", SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, SCREEN_WIDTH, SCREEN_HEIGHT, SDL_WINDOW_SHOWN );
-		if( window == NULL ){
-			std::cout<<"Window could not be created! SDL_Error: "<<SDL_GetError()<<"\n";
-		}else{
-			screenSurface = SDL_GetWindowSurface( window );
-			SDL_FillRect( screenSurface, NULL, SDL_MapRGB( screenSurface->format, 0xFF, 0xFF, 0xFF ) );
+	SDL_Surface* helloWorld = NULL;
+	std::vector<SDL_Surface*> surfaces;
+	surfaces.push_back(screenSurface);
+	surfaces.push_back(helloWorld);
+
+	if(initSDL(window, screenSurface)){
+		if(loadMedia(helloWorld, "hello_world.bmp")){
+			SDL_UpperBlit( helloWorld, NULL, screenSurface, NULL );
 			SDL_UpdateWindowSurface( window );
-            
-            //Hack to get window to stay up
-            SDL_Event e; 
-			bool quit = false;
+			SDL_Event e; 
+			bool quit = false; 
 			while( quit == false ){ 
 				while( SDL_PollEvent( &e ) ){ 
 					if( e.type == SDL_QUIT ) quit = true; 
@@ -31,9 +30,34 @@ int main( int argc, char* args[] ){
 			}
 		}
 	}
-
-	SDL_DestroyWindow( window );
-	SDL_Quit();
-
+	close(window, surfaces);
 	return 0;
+}
+
+bool initSDL(SDL_Window* &window, SDL_Surface* &screenSurface){
+	if( SDL_Init( SDL_INIT_VIDEO ) < 0 ){
+		return false;
+	}else{
+		window = SDL_CreateWindow( "Simple", SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, SCREEN_WIDTH, SCREEN_HEIGHT, SDL_WINDOW_SHOWN );
+		if( window == NULL ) return false;
+		else screenSurface = SDL_GetWindowSurface( window );
+	}
+
+	return true;
+}
+
+bool loadMedia(SDL_Surface* &surface, char* filePath){
+    surface = SDL_LoadBMP(filePath);
+    if( surface == NULL ) return false;
+    return true;
+}
+
+void close(SDL_Window* &window, std::vector<SDL_Surface*> &surfaces){
+	for(auto surface : surfaces){
+		SDL_FreeSurface( surface );
+    	surface = NULL;
+	}
+    SDL_DestroyWindow( window );
+    window = NULL;
+    SDL_Quit();
 }
