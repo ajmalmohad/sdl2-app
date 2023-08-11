@@ -27,7 +27,6 @@ int main( int argc, char* args[] ){
 	SDL_Window* window = NULL;
 	SDL_Renderer* renderer = NULL;
 	SDL_Surface* screenSurface = NULL;
-	SDL_Surface* mapSurface = NULL;
 	std::vector<Uint8> selectColor = {127, 127, 127};
 	struct {
 		int x = -1;
@@ -58,30 +57,22 @@ int main( int argc, char* args[] ){
 					rect.y = j*GRID_SIZE + FONT_PADDING;
 					rect.w = FONT_SIZE;
 					rect.h = FONT_SIZE;
-					boxes[i][j] = rect;
+					boxes[j][i] = rect;
 				}
 			}
 			
-			
+			std::vector<SDL_Texture*> numbers;
 			SDL_Color Black = {0, 0, 0};
-			SDL_Surface* one = TTF_RenderText_Solid(Swansea, "1", Black); 
-			SDL_Texture* oneSurf = SDL_CreateTextureFromSurface(renderer, one);
-			SDL_Surface* two = TTF_RenderText_Solid(Swansea, "2", Black); 
-			SDL_Texture* twoSurf = SDL_CreateTextureFromSurface(renderer, two);
-			SDL_Surface* three = TTF_RenderText_Solid(Swansea, "3", Black); 
-			SDL_Texture* threeSurf = SDL_CreateTextureFromSurface(renderer, three);
-			SDL_Surface* four = TTF_RenderText_Solid(Swansea, "4", Black); 
-			SDL_Texture* fourSurf = SDL_CreateTextureFromSurface(renderer, four);
-			SDL_Surface* five = TTF_RenderText_Solid(Swansea, "5", Black); 
-			SDL_Texture* fiveSurf = SDL_CreateTextureFromSurface(renderer, five);
-			SDL_Surface* six = TTF_RenderText_Solid(Swansea, "6", Black); 
-			SDL_Texture* sixSurf = SDL_CreateTextureFromSurface(renderer, six);
-			SDL_Surface* seven = TTF_RenderText_Solid(Swansea, "7", Black); 
-			SDL_Texture* sevenSurf = SDL_CreateTextureFromSurface(renderer, seven);
-			SDL_Surface* eight = TTF_RenderText_Solid(Swansea, "8", Black); 
-			SDL_Texture* eightSurf = SDL_CreateTextureFromSurface(renderer, eight);
-			SDL_Surface* nine = TTF_RenderText_Solid(Swansea, "9", Black); 
-			SDL_Texture* nineSurf = SDL_CreateTextureFromSurface(renderer, nine);
+			numbers.push_back(SDL_CreateTextureFromSurface( renderer, TTF_RenderText_Solid(Swansea, "0", Black)));
+			numbers.push_back(SDL_CreateTextureFromSurface( renderer, TTF_RenderText_Solid(Swansea, "1", Black)));
+			numbers.push_back(SDL_CreateTextureFromSurface( renderer, TTF_RenderText_Solid(Swansea, "2", Black)));
+			numbers.push_back(SDL_CreateTextureFromSurface( renderer, TTF_RenderText_Solid(Swansea, "3", Black)));
+			numbers.push_back(SDL_CreateTextureFromSurface( renderer, TTF_RenderText_Solid(Swansea, "4", Black)));
+			numbers.push_back(SDL_CreateTextureFromSurface( renderer, TTF_RenderText_Solid(Swansea, "5", Black)));
+			numbers.push_back(SDL_CreateTextureFromSurface( renderer, TTF_RenderText_Solid(Swansea, "6", Black)));
+			numbers.push_back(SDL_CreateTextureFromSurface( renderer, TTF_RenderText_Solid(Swansea, "7", Black)));
+			numbers.push_back(SDL_CreateTextureFromSurface( renderer, TTF_RenderText_Solid(Swansea, "8", Black)));
+			numbers.push_back(SDL_CreateTextureFromSurface( renderer, TTF_RenderText_Solid(Swansea, "9", Black)));
 
 			while( isRunning ){ 
 
@@ -135,31 +126,31 @@ int main( int argc, char* args[] ){
 							switch (board[i][j])
 							{
 							case '1':
-								SDL_RenderCopy(renderer, oneSurf, NULL, &boxes[i][j]);
+								SDL_RenderCopy(renderer, numbers[1], NULL, &boxes[i][j]);
 								break;
 							case '2':
-								SDL_RenderCopy(renderer, twoSurf, NULL, &boxes[i][j]);
+								SDL_RenderCopy(renderer, numbers[2], NULL, &boxes[i][j]);
 								break;
 							case '3':
-								SDL_RenderCopy(renderer, threeSurf, NULL, &boxes[i][j]);
+								SDL_RenderCopy(renderer, numbers[3], NULL, &boxes[i][j]);
 								break;
 							case '4':
-								SDL_RenderCopy(renderer, fourSurf, NULL, &boxes[i][j]);
+								SDL_RenderCopy(renderer, numbers[4], NULL, &boxes[i][j]);
 								break;
 							case '5':
-								SDL_RenderCopy(renderer, fiveSurf, NULL, &boxes[i][j]);
+								SDL_RenderCopy(renderer, numbers[5], NULL, &boxes[i][j]);
 								break;
 							case '6':
-								SDL_RenderCopy(renderer, sixSurf, NULL, &boxes[i][j]);
+								SDL_RenderCopy(renderer, numbers[6], NULL, &boxes[i][j]);
 								break;
 							case '7':
-								SDL_RenderCopy(renderer, sevenSurf, NULL, &boxes[i][j]);
+								SDL_RenderCopy(renderer, numbers[7], NULL, &boxes[i][j]);
 								break;
 							case '8':
-								SDL_RenderCopy(renderer, eightSurf, NULL, &boxes[i][j]);
+								SDL_RenderCopy(renderer, numbers[8], NULL, &boxes[i][j]);
 								break;
 							case '9':
-								SDL_RenderCopy(renderer, nineSurf, NULL, &boxes[i][j]);
+								SDL_RenderCopy(renderer, numbers[9], NULL, &boxes[i][j]);
 								break;
 							
 							default:
