@@ -61,18 +61,17 @@ int main( int argc, char* args[] ){
 				}
 			}
 			
-			std::vector<SDL_Texture*> numbers;
+			std::vector<SDL_Surface*> numSurfaces;
 			SDL_Color Black = {0, 0, 0};
-			numbers.push_back(SDL_CreateTextureFromSurface( renderer, TTF_RenderText_Solid(Swansea, "0", Black)));
-			numbers.push_back(SDL_CreateTextureFromSurface( renderer, TTF_RenderText_Solid(Swansea, "1", Black)));
-			numbers.push_back(SDL_CreateTextureFromSurface( renderer, TTF_RenderText_Solid(Swansea, "2", Black)));
-			numbers.push_back(SDL_CreateTextureFromSurface( renderer, TTF_RenderText_Solid(Swansea, "3", Black)));
-			numbers.push_back(SDL_CreateTextureFromSurface( renderer, TTF_RenderText_Solid(Swansea, "4", Black)));
-			numbers.push_back(SDL_CreateTextureFromSurface( renderer, TTF_RenderText_Solid(Swansea, "5", Black)));
-			numbers.push_back(SDL_CreateTextureFromSurface( renderer, TTF_RenderText_Solid(Swansea, "6", Black)));
-			numbers.push_back(SDL_CreateTextureFromSurface( renderer, TTF_RenderText_Solid(Swansea, "7", Black)));
-			numbers.push_back(SDL_CreateTextureFromSurface( renderer, TTF_RenderText_Solid(Swansea, "8", Black)));
-			numbers.push_back(SDL_CreateTextureFromSurface( renderer, TTF_RenderText_Solid(Swansea, "9", Black)));
+			for (int i = 0; i <= 9; i++){
+				numSurfaces.push_back(TTF_RenderText_Solid(Swansea, std::to_string(i).c_str(), Black));
+				surfaces.push_back(numSurfaces[i]);
+			}
+
+			std::vector<SDL_Texture*> numbers;
+			for (int i = 0; i <= 9; i++){
+				numbers.push_back(SDL_CreateTextureFromSurface(renderer, numSurfaces[i]));
+			}
 
 			while( isRunning ){ 
 
