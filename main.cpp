@@ -33,7 +33,10 @@ int main( int argc, char* args[] ){
 		int x = -1;
 		int y = -1;
 	} selectedPosition;
-	TTF_Font* Swansea = TTF_OpenFont("Swansea.ttf", 24);
+
+	const int FONT_SIZE = 30;
+	TTF_Font* Swansea = TTF_OpenFont("Swansea.ttf", FONT_SIZE);
+	const int FONT_PADDING = (GRID_SIZE - FONT_SIZE)/2;
 
 	if(initSDL(window, renderer, screenSurface, "Sudoku")){
 			SDL_Event e; 
@@ -46,17 +49,39 @@ int main( int argc, char* args[] ){
 
 			int FPS = 24;
 			int desiredDelta = 1000/FPS;
+
+			std::vector<std::vector<SDL_Rect>> boxes(10, std::vector<SDL_Rect>(10));
+			for (int i = 0; i < 9; i++){
+				for (int j = 0; j < 9; j++){
+					SDL_Rect rect;
+					rect.x = i*GRID_SIZE + FONT_PADDING;
+					rect.y = j*GRID_SIZE + FONT_PADDING;
+					rect.w = FONT_SIZE;
+					rect.h = FONT_SIZE;
+					boxes[i][j] = rect;
+				}
+			}
+			
 			
 			SDL_Color Black = {0, 0, 0};
 			SDL_Surface* one = TTF_RenderText_Solid(Swansea, "1", Black); 
+			SDL_Texture* oneSurf = SDL_CreateTextureFromSurface(renderer, one);
 			SDL_Surface* two = TTF_RenderText_Solid(Swansea, "2", Black); 
+			SDL_Texture* twoSurf = SDL_CreateTextureFromSurface(renderer, two);
 			SDL_Surface* three = TTF_RenderText_Solid(Swansea, "3", Black); 
+			SDL_Texture* threeSurf = SDL_CreateTextureFromSurface(renderer, three);
 			SDL_Surface* four = TTF_RenderText_Solid(Swansea, "4", Black); 
+			SDL_Texture* fourSurf = SDL_CreateTextureFromSurface(renderer, four);
 			SDL_Surface* five = TTF_RenderText_Solid(Swansea, "5", Black); 
+			SDL_Texture* fiveSurf = SDL_CreateTextureFromSurface(renderer, five);
 			SDL_Surface* six = TTF_RenderText_Solid(Swansea, "6", Black); 
+			SDL_Texture* sixSurf = SDL_CreateTextureFromSurface(renderer, six);
 			SDL_Surface* seven = TTF_RenderText_Solid(Swansea, "7", Black); 
+			SDL_Texture* sevenSurf = SDL_CreateTextureFromSurface(renderer, seven);
 			SDL_Surface* eight = TTF_RenderText_Solid(Swansea, "8", Black); 
+			SDL_Texture* eightSurf = SDL_CreateTextureFromSurface(renderer, eight);
 			SDL_Surface* nine = TTF_RenderText_Solid(Swansea, "9", Black); 
+			SDL_Texture* nineSurf = SDL_CreateTextureFromSurface(renderer, nine);
 
 			while( isRunning ){ 
 
@@ -103,6 +128,47 @@ int main( int argc, char* args[] ){
 					SDL_RenderFillRect(renderer, &rectangle);
 					std::cout<<selectedPosition.x<<" "<<selectedPosition.y<<"\n";
 				}
+
+				for (int i = 0; i < 9; i++){
+					for (int j = 0; j < 9; j++){
+						if(board[i][j] != '.'){
+							switch (board[i][j])
+							{
+							case '1':
+								SDL_RenderCopy(renderer, oneSurf, NULL, &boxes[i][j]);
+								break;
+							case '2':
+								SDL_RenderCopy(renderer, twoSurf, NULL, &boxes[i][j]);
+								break;
+							case '3':
+								SDL_RenderCopy(renderer, threeSurf, NULL, &boxes[i][j]);
+								break;
+							case '4':
+								SDL_RenderCopy(renderer, fourSurf, NULL, &boxes[i][j]);
+								break;
+							case '5':
+								SDL_RenderCopy(renderer, fiveSurf, NULL, &boxes[i][j]);
+								break;
+							case '6':
+								SDL_RenderCopy(renderer, sixSurf, NULL, &boxes[i][j]);
+								break;
+							case '7':
+								SDL_RenderCopy(renderer, sevenSurf, NULL, &boxes[i][j]);
+								break;
+							case '8':
+								SDL_RenderCopy(renderer, eightSurf, NULL, &boxes[i][j]);
+								break;
+							case '9':
+								SDL_RenderCopy(renderer, nineSurf, NULL, &boxes[i][j]);
+								break;
+							
+							default:
+								break;
+							}
+						}
+					}
+				}
+
 				SDL_RenderPresent(renderer);
 
 				int delta = SDL_GetTicks() - startLoop;
