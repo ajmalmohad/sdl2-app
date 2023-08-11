@@ -1,96 +1,116 @@
 #include <SDL.h>
 #include <iostream>
 #include <vector>
+#include <time.h>
+#include <string>
+#include <cmath>
 
-const int SCREEN_WIDTH = 720;
-const int SCREEN_HEIGHT = 576;
+const int GRID_SIZE = 60;
+const int SCREEN_WIDTH = GRID_SIZE*9;
+const int SCREEN_HEIGHT = GRID_SIZE*9;
+const int SCREEN_FPS = 60;
+const int SCREEN_TICKS_PER_FRAME = 1000 / SCREEN_FPS;
 std::vector<SDL_Surface*> surfaces;
 
-enum KeyPressSurfaces{
-    KEY_PRESS_SURFACE_DEFAULT,
-    KEY_PRESS_SURFACE_UP,
-    KEY_PRESS_SURFACE_DOWN,
-    KEY_PRESS_SURFACE_LEFT,
-    KEY_PRESS_SURFACE_RIGHT,
-    KEY_PRESS_SURFACE_TOTAL
-};
-
-bool initSDL(SDL_Window* &window, SDL_Surface* &screenSurface, std::string name);
-bool loadMedia(SDL_Surface* &surface, std::string filePath);
-void close(SDL_Window* &window);
+bool initSDL(SDL_Window* &window, SDL_Renderer* &renderer, SDL_Surface* &screenSurface, std::string name);
+void close(SDL_Window* &window, SDL_Renderer* renderer);
 
 int main( int argc, char* args[] ){
 	SDL_Window* window = NULL;
+	SDL_Renderer* renderer = NULL;
 	SDL_Surface* screenSurface = NULL;
 	SDL_Surface* mapSurface = NULL;
-	struct pos {
-		int x = 0;
-		int y = 0;
-	} player;
+	std::vector<Uint8> selectColor = {127, 127, 127};
+	struct {
+		int x = -1;
+		int y = -1;
+	} selectedPosition;
 
-	if(initSDL(window, screenSurface, "Game")){
-		if(loadMedia(mapSurface, "hello_world.bmp")){
-			SDL_BlitSurface( mapSurface, NULL, screenSurface, NULL );
-			SDL_UpdateWindowSurface( window );
+	if(initSDL(window, renderer, screenSurface, "Sudoku")){
 			SDL_Event e; 
+			SDL_Rect rectangle;
+			rectangle.x = 0;
+			rectangle.y = 0;
+			rectangle.w = GRID_SIZE+1;
+			rectangle.h = GRID_SIZE+1;
 			bool isRunning = true; 
+
+			int FPS = 30;
+			int desiredDelta = 1000/FPS;
+
 			while( isRunning ){ 
+
+				int startLoop = SDL_GetTicks();
+
 				while( SDL_PollEvent( &e ) ){ 
-					std::cout<<player.x<<" "<<player.y<<"\n";
-					if( e.type == SDL_QUIT ) isRunning = false; 
-					else if( e.type == SDL_KEYDOWN ){
-                        switch( e.key.keysym.sym ){
-							case SDLK_UP:
-                            	player.y++;
-                            	break;
-
-                            case SDLK_DOWN:
-								player.y--;
-                            	break;
-
-                            case SDLK_LEFT:
-								player.x--;
-								break;
-
-                            case SDLK_RIGHT:
-								player.x++;
-								break;
-
-                            default:
-								break;
-                        }
-                    }
+					int x, y;
+					switch (e.type){
+					case SDL_QUIT:
+						isRunning = false; 
+						break;
+					case SDL_TEXTINPUT:
+						if(isdigit(e.text.text[0])){
+							std::cout<<e.text.text<<"\n";
+						}
+						break;
+					case SDL_MOUSEBUTTONDOWN:
+						selectedPosition.x = e.button.x/GRID_SIZE;
+						selectedPosition.y = e.button.y/GRID_SIZE;
+						break;
+					default:
+						break;
+					}
 				}
+
+				SDL_SetRenderDrawColor(renderer, 255, 255, 255, 255);
+				SDL_RenderClear(renderer);
+				SDL_SetRenderDrawColor(renderer, 0 ,0 , 0, 1);
+				
+				for(int i=0; i<=SCREEN_HEIGHT; i+=GRID_SIZE){
+					if(i%(GRID_SIZE*3) == 0){
+						SDL_SetRenderDrawColor(renderer,0,0,0,1);
+					}else{
+						SDL_SetRenderDrawColor(renderer,160,160,160,1);
+					}
+					SDL_RenderDrawLine(renderer,0, i, 540, i);
+					SDL_RenderDrawLine(renderer,i, 0, i, 540);
+				}
+
+				if(selectedPosition.x != -1 && selectedPosition.y != -1){;
+					rectangle.x = selectedPosition.x*GRID_SIZE;
+					rectangle.y = selectedPosition.y*GRID_SIZE;
+					SDL_SetRenderDrawColor(renderer,127,127,0,1);
+					SDL_RenderFillRect(renderer, &rectangle);
+					std::cout<<selectedPosition.x<<" "<<selectedPosition.y<<"\n";
+				}
+				SDL_RenderPresent(renderer);
+
+				int delta = SDL_GetTicks() - startLoop;
+				if(delta < desiredDelta) SDL_Delay(desiredDelta - delta);
 			}
-		}
 	}
-	close(window);
+	close(window, renderer);
 	return 0;
 }
 
-bool initSDL(SDL_Window* &window, SDL_Surface* &screenSurface, std::string name){
+bool initSDL(SDL_Window* &window, SDL_Renderer* &renderer, SDL_Surface* &screenSurface, std::string name){
 	if( SDL_Init( SDL_INIT_VIDEO ) < 0 ){
 		return false;
 	}else{
 		window = SDL_CreateWindow( name.c_str(), SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, SCREEN_WIDTH, SCREEN_HEIGHT, SDL_WINDOW_SHOWN );
 		if( window == NULL ) return false;
-		else screenSurface = SDL_GetWindowSurface( window );
+		renderer = SDL_CreateRenderer( window , -1, SDL_RENDERER_ACCELERATED );
+		screenSurface = SDL_GetWindowSurface( window );
 	}
 	return true;
 }
 
-bool loadMedia(SDL_Surface* &surface, std::string filePath){
-    surface = SDL_LoadBMP(filePath.c_str());
-    if( surface == NULL ) return false;
-	surfaces.push_back(surface);
-    return true;
-}
-
-void close(SDL_Window* &window){
+void close(SDL_Window* &window, SDL_Renderer* renderer){
 	for(int i=0; i<surfaces.size(); i++){
 		SDL_FreeSurface(surfaces[i]);
 		surfaces[i] = NULL;
 	}
+	SDL_DestroyRenderer( renderer );
     SDL_DestroyWindow( window );
     window = NULL;
     SDL_Quit();
