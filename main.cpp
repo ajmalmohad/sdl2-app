@@ -1,4 +1,5 @@
 #include <SDL.h>
+#include <SDL_ttf.h>
 #include <iostream>
 #include <vector>
 #include <time.h>
@@ -12,10 +13,17 @@ const int SCREEN_FPS = 60;
 const int SCREEN_TICKS_PER_FRAME = 1000 / SCREEN_FPS;
 std::vector<SDL_Surface*> surfaces;
 
+std::vector<std::vector<char>> board {{'5','3','.','.','7','.','.','.','.'},
+{'6','.','.','1','9','5','.','.','.'},{'.','9','8','.','.','.','.','6','.'},
+{'8','.','.','.','6','.','.','.','3'},{'4','.','.','8','.','3','.','.','1'},
+{'7','.','.','.','2','.','.','.','6'},{'.','6','.','.','.','.','2','8','.'},
+{'.','.','.','4','1','9','.','.','5'},{'.','.','.','.','8','.','.','7','9'}};
+
 bool initSDL(SDL_Window* &window, SDL_Renderer* &renderer, SDL_Surface* &screenSurface, std::string name);
 void close(SDL_Window* &window, SDL_Renderer* renderer);
 
 int main( int argc, char* args[] ){
+	TTF_Init();
 	SDL_Window* window = NULL;
 	SDL_Renderer* renderer = NULL;
 	SDL_Surface* screenSurface = NULL;
@@ -25,6 +33,7 @@ int main( int argc, char* args[] ){
 		int x = -1;
 		int y = -1;
 	} selectedPosition;
+	TTF_Font* Sans = TTF_OpenFont("Swansea.ttf", 24);
 
 	if(initSDL(window, renderer, screenSurface, "Sudoku")){
 			SDL_Event e; 
@@ -35,7 +44,7 @@ int main( int argc, char* args[] ){
 			rectangle.h = GRID_SIZE+1;
 			bool isRunning = true; 
 
-			int FPS = 30;
+			int FPS = 24;
 			int desiredDelta = 1000/FPS;
 
 			while( isRunning ){ 
@@ -113,5 +122,6 @@ void close(SDL_Window* &window, SDL_Renderer* renderer){
 	SDL_DestroyRenderer( renderer );
     SDL_DestroyWindow( window );
     window = NULL;
+	TTF_Quit();
     SDL_Quit();
 }
