@@ -37,6 +37,16 @@ int main( int argc, char* args[] ){
 	TTF_Font* Swansea = TTF_OpenFont("Swansea.ttf", FONT_SIZE);
 	const int FONT_PADDING = (GRID_SIZE - FONT_SIZE)/2;
 
+	std::vector<std::vector<bool>> defined(10, std::vector<bool>(10, false)); 
+
+	for (int i = 0; i < 9; i++){
+		for (int j = 0; j < 9; j++){
+			if(board[i][j] != '.'){
+				defined[i][j] = true;
+			}
+		}
+	}
+
 	if(initSDL(window, renderer, screenSurface, "Sudoku")){
 			SDL_Event e; 
 			SDL_Rect rectangle;
@@ -53,11 +63,11 @@ int main( int argc, char* args[] ){
 			for (int i = 0; i < 9; i++){
 				for (int j = 0; j < 9; j++){
 					SDL_Rect rect;
-					rect.x = i*GRID_SIZE + FONT_PADDING;
-					rect.y = j*GRID_SIZE + FONT_PADDING;
+					rect.y = i*GRID_SIZE + FONT_PADDING;
+					rect.x = j*GRID_SIZE + FONT_PADDING;
 					rect.w = FONT_SIZE;
 					rect.h = FONT_SIZE;
-					boxes[j][i] = rect;
+					boxes[i][j] = rect;
 				}
 			}
 			
@@ -84,13 +94,24 @@ int main( int argc, char* args[] ){
 						isRunning = false; 
 						break;
 					case SDL_TEXTINPUT:
-						if(isdigit(e.text.text[0])){
-							std::cout<<e.text.text<<"\n";
+						if(
+							selectedPosition.x != -1 && selectedPosition.y != -1 &&
+							!defined[selectedPosition.x][selectedPosition.y] && 
+							isdigit(e.text.text[0]) && e.text.text[0] - '0' != 0
+						){
+							board[selectedPosition.x][selectedPosition.y] = e.text.text[0];
+							for(auto row : board){
+								for(char num : row){
+									std::cout<<num<<" ";
+								}
+								std::cout<<"\n";
+							}
+							std::cout<<"\n";
 						}
 						break;
 					case SDL_MOUSEBUTTONDOWN:
-						selectedPosition.x = e.button.x/GRID_SIZE;
-						selectedPosition.y = e.button.y/GRID_SIZE;
+						selectedPosition.x = e.button.y/GRID_SIZE;
+						selectedPosition.y = e.button.x/GRID_SIZE;
 						break;
 					default:
 						break;
@@ -112,48 +133,47 @@ int main( int argc, char* args[] ){
 				}
 
 				if(selectedPosition.x != -1 && selectedPosition.y != -1){;
-					rectangle.x = selectedPosition.x*GRID_SIZE;
-					rectangle.y = selectedPosition.y*GRID_SIZE;
-					SDL_SetRenderDrawColor(renderer,127,127,0,1);
-					SDL_RenderFillRect(renderer, &rectangle);
-					std::cout<<selectedPosition.x<<" "<<selectedPosition.y<<"\n";
+					if(!defined[selectedPosition.x][selectedPosition.y]){
+						rectangle.x = selectedPosition.y*GRID_SIZE;
+						rectangle.y = selectedPosition.x*GRID_SIZE;
+						SDL_SetRenderDrawColor(renderer,200, 200, 200, 1);
+						SDL_RenderFillRect(renderer, &rectangle);
+					}
 				}
 
 				for (int i = 0; i < 9; i++){
 					for (int j = 0; j < 9; j++){
 						if(board[i][j] != '.'){
-							switch (board[i][j])
-							{
-							case '1':
-								SDL_RenderCopy(renderer, numbers[1], NULL, &boxes[i][j]);
-								break;
-							case '2':
-								SDL_RenderCopy(renderer, numbers[2], NULL, &boxes[i][j]);
-								break;
-							case '3':
-								SDL_RenderCopy(renderer, numbers[3], NULL, &boxes[i][j]);
-								break;
-							case '4':
-								SDL_RenderCopy(renderer, numbers[4], NULL, &boxes[i][j]);
-								break;
-							case '5':
-								SDL_RenderCopy(renderer, numbers[5], NULL, &boxes[i][j]);
-								break;
-							case '6':
-								SDL_RenderCopy(renderer, numbers[6], NULL, &boxes[i][j]);
-								break;
-							case '7':
-								SDL_RenderCopy(renderer, numbers[7], NULL, &boxes[i][j]);
-								break;
-							case '8':
-								SDL_RenderCopy(renderer, numbers[8], NULL, &boxes[i][j]);
-								break;
-							case '9':
-								SDL_RenderCopy(renderer, numbers[9], NULL, &boxes[i][j]);
-								break;
-							
-							default:
-								break;
+							switch (board[i][j]){
+								case '1':
+									SDL_RenderCopy(renderer, numbers[1], NULL, &boxes[i][j]);
+									break;
+								case '2':
+									SDL_RenderCopy(renderer, numbers[2], NULL, &boxes[i][j]);
+									break;
+								case '3':
+									SDL_RenderCopy(renderer, numbers[3], NULL, &boxes[i][j]);
+									break;
+								case '4':
+									SDL_RenderCopy(renderer, numbers[4], NULL, &boxes[i][j]);
+									break;
+								case '5':
+									SDL_RenderCopy(renderer, numbers[5], NULL, &boxes[i][j]);
+									break;
+								case '6':
+									SDL_RenderCopy(renderer, numbers[6], NULL, &boxes[i][j]);
+									break;
+								case '7':
+									SDL_RenderCopy(renderer, numbers[7], NULL, &boxes[i][j]);
+									break;
+								case '8':
+									SDL_RenderCopy(renderer, numbers[8], NULL, &boxes[i][j]);
+									break;
+								case '9':
+									SDL_RenderCopy(renderer, numbers[9], NULL, &boxes[i][j]);
+									break;
+								default:
+									break;
 							}
 						}
 					}
