@@ -33,7 +33,7 @@ int main( int argc, char* args[] ){
 		int x = -1;
 		int y = -1;
 	} selectedPosition;
-	TTF_Font* Sans = TTF_OpenFont("Swansea.ttf", 24);
+	TTF_Font* Swansea = TTF_OpenFont("Swansea.ttf", 24);
 
 	if(initSDL(window, renderer, screenSurface, "Sudoku")){
 			SDL_Event e; 
@@ -46,6 +46,17 @@ int main( int argc, char* args[] ){
 
 			int FPS = 24;
 			int desiredDelta = 1000/FPS;
+			
+			SDL_Color Black = {0, 0, 0};
+			SDL_Surface* one = TTF_RenderText_Solid(Swansea, "1", Black); 
+			SDL_Surface* two = TTF_RenderText_Solid(Swansea, "2", Black); 
+			SDL_Surface* three = TTF_RenderText_Solid(Swansea, "3", Black); 
+			SDL_Surface* four = TTF_RenderText_Solid(Swansea, "4", Black); 
+			SDL_Surface* five = TTF_RenderText_Solid(Swansea, "5", Black); 
+			SDL_Surface* six = TTF_RenderText_Solid(Swansea, "6", Black); 
+			SDL_Surface* seven = TTF_RenderText_Solid(Swansea, "7", Black); 
+			SDL_Surface* eight = TTF_RenderText_Solid(Swansea, "8", Black); 
+			SDL_Surface* nine = TTF_RenderText_Solid(Swansea, "9", Black); 
 
 			while( isRunning ){ 
 
