@@ -1,4 +1,4 @@
-# SDL2
+# Sudoku
 
 ## How to compile
 1. Setup the library (Windows)
