@@ -13,11 +13,14 @@ const int SCREEN_FPS = 60;
 const int SCREEN_TICKS_PER_FRAME = 1000 / SCREEN_FPS;
 const int FONT_SIZE = 30;
 const int FONT_PADDING = (GRID_SIZE - FONT_SIZE)/2;
+const int FPS = 24;
+const int desiredDelta = 1000/FPS;
 
 SDL_Window* window = NULL;
 SDL_Renderer* renderer = NULL;
 SDL_Surface* screenSurface = NULL;
 std::vector<SDL_Surface*> surfaces;
+std::vector<SDL_Texture*> textures;
 
 std::vector<std::vector<char>> board {
 	{'5','3','.','.','7','.','.','.','.'},
@@ -32,6 +35,12 @@ std::vector<std::vector<char>> board {
 };
 std::vector<std::vector<bool>> defined(10, std::vector<bool>(10, false)); 
 std::vector<std::vector<bool>> error(10, std::vector<bool>(10, false)); 
+std::vector<std::vector<SDL_Rect>> boxes(10, std::vector<SDL_Rect>(10));
+std::vector<std::vector<SDL_Rect>> errorboxes(10, std::vector<SDL_Rect>(10));
+
+std::vector<std::vector<bool>> rows(10, std::vector<bool>(10, false));
+std::vector<std::vector<bool>> cols(10, std::vector<bool>(10, false));
+std::vector<std::vector<bool>> subgrid(10, std::vector<bool>(10, false));
 
 std::vector<Uint8> selectColor = {127, 127, 127};
 struct {
@@ -54,12 +63,30 @@ void close(){
 		SDL_FreeSurface(surfaces[i]);
 		surfaces[i] = NULL;
 	}
+	for(int i=0; i<textures.size(); i++){
+		SDL_DestroyTexture(textures[i]);
+		textures[i] = NULL;
+	}
 	SDL_DestroyRenderer( renderer );
     SDL_DestroyWindow( window );
 	renderer = NULL;
     window = NULL;
 	TTF_Quit();
     SDL_Quit();
+}
+
+void setErrors(){
+
+}
+
+void printBoard(){
+	for(auto row : board){
+		for(char num : row){
+			std::cout<<num<<" ";
+		}
+		std::cout<<"\n";
+	}
+	std::cout<<"\n";
 }
 
 int main( int argc, char* args[] ){
@@ -84,10 +111,17 @@ int main( int argc, char* args[] ){
 			rectangle.h = GRID_SIZE+1;
 			bool isRunning = true; 
 
-			int FPS = 24;
-			int desiredDelta = 1000/FPS;
+			for(int i=0; i<9; i++){
+				for(int j=0; j<9; j++){
+					if(board[i][j] != '.'){
+						int num = board[i][j] - '0';
+						rows[i][num] = true;
+						cols[j][num] = true;
+						subgrid[((i/3)*3)+j/3][num] = true;
+					}
+				}
+			}
 
-			std::vector<std::vector<SDL_Rect>> boxes(10, std::vector<SDL_Rect>(10));
 			for (int i = 0; i < 9; i++){
 				for (int j = 0; j < 9; j++){
 					SDL_Rect rect;
@@ -96,6 +130,17 @@ int main( int argc, char* args[] ){
 					rect.w = FONT_SIZE;
 					rect.h = FONT_SIZE;
 					boxes[i][j] = rect;
+				}
+			}
+
+			for (int i = 0; i < 9; i++){
+				for (int j = 0; j < 9; j++){
+					SDL_Rect rect;
+					rect.y = i*GRID_SIZE;
+					rect.x = j*GRID_SIZE;
+					rect.w = GRID_SIZE;
+					rect.h = GRID_SIZE;
+					errorboxes[i][j] = rect;
 				}
 			}
 			
@@ -109,6 +154,7 @@ int main( int argc, char* args[] ){
 			std::vector<SDL_Texture*> numbers;
 			for (int i = 0; i <= 9; i++){
 				numbers.push_back(SDL_CreateTextureFromSurface(renderer, numSurfaces[i]));
+				textures.push_back(numbers[i]);
 			}
 
 			while( isRunning ){ 
@@ -127,14 +173,17 @@ int main( int argc, char* args[] ){
 							!defined[selectedPosition.x][selectedPosition.y] && 
 							isdigit(e.text.text[0]) && e.text.text[0] - '0' != 0
 						){
-							board[selectedPosition.x][selectedPosition.y] = e.text.text[0];
-							for(auto row : board){
-								for(char num : row){
-									std::cout<<num<<" ";
-								}
-								std::cout<<"\n";
-							}
-							std::cout<<"\n";
+							int num = e.text.text[0] - '0';
+							int i = selectedPosition.x;
+							int j = selectedPosition.y;
+
+							board[i][j] = e.text.text[0];
+							rows[i][num] = true;
+							cols[j][num] = true;
+							subgrid[((i/3)*3)+j/3][num] = true;
+
+							setErrors();
+							printBoard();
 						}
 						break;
 					case SDL_MOUSEBUTTONDOWN:
@@ -160,6 +209,17 @@ int main( int argc, char* args[] ){
 					SDL_RenderDrawLine(renderer,i, 0, i, 540);
 				}
 
+				for (int i = 0; i < 9; i++){
+					for (int j = 0; j < 9; j++){
+						if(error[i][j]){
+							std::cout<<i<<" "<<j<<"\n";
+							SDL_SetRenderDrawColor(renderer,200, 0, 0, 1);
+							SDL_RenderFillRect(renderer, &errorboxes[i][j]);
+						}
+					}
+				}
+
+				// Selected Position box render
 				if(selectedPosition.x != -1 && selectedPosition.y != -1){;
 					if(!defined[selectedPosition.x][selectedPosition.y]){
 						rectangle.x = selectedPosition.y*GRID_SIZE;
@@ -169,6 +229,7 @@ int main( int argc, char* args[] ){
 					}
 				}
 				
+				// Render Tiles based on board numbers
 				for (int i = 0; i < 9; i++){
 					for (int j = 0; j < 9; j++){
 						if(board[i][j] != '.'){
