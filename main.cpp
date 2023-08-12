@@ -11,6 +11,8 @@ const int SCREEN_WIDTH = GRID_SIZE*9;
 const int SCREEN_HEIGHT = GRID_SIZE*9;
 const int SCREEN_FPS = 60;
 const int SCREEN_TICKS_PER_FRAME = 1000 / SCREEN_FPS;
+const int FONT_SIZE = 30;
+const int FONT_PADDING = (GRID_SIZE - FONT_SIZE)/2;
 
 SDL_Window* window = NULL;
 SDL_Renderer* renderer = NULL;
@@ -28,6 +30,16 @@ std::vector<std::vector<char>> board {
 	{'.','.','.','4','1','9','.','.','5'},
 	{'.','.','.','.','8','.','.','7','9'}
 };
+std::vector<std::vector<bool>> defined(10, std::vector<bool>(10, false)); 
+std::vector<std::vector<bool>> error(10, std::vector<bool>(10, false)); 
+
+TTF_Font* Swansea = TTF_OpenFont("Swansea.ttf", FONT_SIZE);
+std::vector<Uint8> selectColor = {127, 127, 127};
+struct {
+	int x = -1;
+	int y = -1;
+} selectedPosition;
+
 
 bool initSDL(std::string name){
 	if( SDL_Init( SDL_INIT_VIDEO ) < 0 ) return false;
@@ -54,18 +66,6 @@ void close(){
 
 int main( int argc, char* args[] ){
 	TTF_Init();
-	std::vector<Uint8> selectColor = {127, 127, 127};
-	struct {
-		int x = -1;
-		int y = -1;
-	} selectedPosition;
-
-	const int FONT_SIZE = 30;
-	TTF_Font* Swansea = TTF_OpenFont("Swansea.ttf", FONT_SIZE);
-	const int FONT_PADDING = (GRID_SIZE - FONT_SIZE)/2;
-
-	std::vector<std::vector<bool>> defined(10, std::vector<bool>(10, false)); 
-	std::vector<std::vector<bool>> error(10, std::vector<bool>(10, false)); 
 
 	for (int i = 0; i < 9; i++){
 		for (int j = 0; j < 9; j++){
