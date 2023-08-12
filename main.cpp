@@ -33,13 +33,11 @@ std::vector<std::vector<char>> board {
 std::vector<std::vector<bool>> defined(10, std::vector<bool>(10, false)); 
 std::vector<std::vector<bool>> error(10, std::vector<bool>(10, false)); 
 
-TTF_Font* Swansea = TTF_OpenFont("Swansea.ttf", FONT_SIZE);
 std::vector<Uint8> selectColor = {127, 127, 127};
 struct {
 	int x = -1;
 	int y = -1;
 } selectedPosition;
-
 
 bool initSDL(std::string name){
 	if( SDL_Init( SDL_INIT_VIDEO ) < 0 ) return false;
@@ -66,6 +64,8 @@ void close(){
 
 int main( int argc, char* args[] ){
 	TTF_Init();
+
+	TTF_Font* Swansea = TTF_OpenFont("Swansea.ttf", FONT_SIZE);
 
 	for (int i = 0; i < 9; i++){
 		for (int j = 0; j < 9; j++){
