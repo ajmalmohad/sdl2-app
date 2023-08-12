@@ -11,22 +11,49 @@ const int SCREEN_WIDTH = GRID_SIZE*9;
 const int SCREEN_HEIGHT = GRID_SIZE*9;
 const int SCREEN_FPS = 60;
 const int SCREEN_TICKS_PER_FRAME = 1000 / SCREEN_FPS;
+
+SDL_Window* window = NULL;
+SDL_Renderer* renderer = NULL;
+SDL_Surface* screenSurface = NULL;
 std::vector<SDL_Surface*> surfaces;
 
-std::vector<std::vector<char>> board {{'5','3','.','.','7','.','.','.','.'},
-{'6','.','.','1','9','5','.','.','.'},{'.','9','8','.','.','.','.','6','.'},
-{'8','.','.','.','6','.','.','.','3'},{'4','.','.','8','.','3','.','.','1'},
-{'7','.','.','.','2','.','.','.','6'},{'.','6','.','.','.','.','2','8','.'},
-{'.','.','.','4','1','9','.','.','5'},{'.','.','.','.','8','.','.','7','9'}};
+std::vector<std::vector<char>> board {
+	{'5','3','.','.','7','.','.','.','.'},
+	{'6','.','.','1','9','5','.','.','.'},
+	{'.','9','8','.','.','.','.','6','.'},
+	{'8','.','.','.','6','.','.','.','3'},
+	{'4','.','.','8','.','3','.','.','1'},
+	{'7','.','.','.','2','.','.','.','6'},
+	{'.','6','.','.','.','.','2','8','.'},
+	{'.','.','.','4','1','9','.','.','5'},
+	{'.','.','.','.','8','.','.','7','9'}
+};
 
-bool initSDL(SDL_Window* &window, SDL_Renderer* &renderer, SDL_Surface* &screenSurface, std::string name);
-void close(SDL_Window* &window, SDL_Renderer* renderer);
+bool initSDL(std::string name){
+	if( SDL_Init( SDL_INIT_VIDEO ) < 0 ) return false;
+
+	window = SDL_CreateWindow( name.c_str(), SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, SCREEN_WIDTH, SCREEN_HEIGHT, SDL_WINDOW_SHOWN );
+	if( window == NULL ) return false;
+	renderer = SDL_CreateRenderer( window , -1, SDL_RENDERER_ACCELERATED );
+	screenSurface = SDL_GetWindowSurface( window );
+	return true;
+}
+
+void close(){
+	for(int i=0; i<surfaces.size(); i++){
+		SDL_FreeSurface(surfaces[i]);
+		surfaces[i] = NULL;
+	}
+	SDL_DestroyRenderer( renderer );
+    SDL_DestroyWindow( window );
+	renderer = NULL;
+    window = NULL;
+	TTF_Quit();
+    SDL_Quit();
+}
 
 int main( int argc, char* args[] ){
 	TTF_Init();
-	SDL_Window* window = NULL;
-	SDL_Renderer* renderer = NULL;
-	SDL_Surface* screenSurface = NULL;
 	std::vector<Uint8> selectColor = {127, 127, 127};
 	struct {
 		int x = -1;
@@ -38,6 +65,7 @@ int main( int argc, char* args[] ){
 	const int FONT_PADDING = (GRID_SIZE - FONT_SIZE)/2;
 
 	std::vector<std::vector<bool>> defined(10, std::vector<bool>(10, false)); 
+	std::vector<std::vector<bool>> error(10, std::vector<bool>(10, false)); 
 
 	for (int i = 0; i < 9; i++){
 		for (int j = 0; j < 9; j++){
@@ -47,7 +75,7 @@ int main( int argc, char* args[] ){
 		}
 	}
 
-	if(initSDL(window, renderer, screenSurface, "Sudoku")){
+	if(initSDL("Sudoku")){
 			SDL_Event e; 
 			SDL_Rect rectangle;
 			rectangle.x = 0;
@@ -140,7 +168,7 @@ int main( int argc, char* args[] ){
 						SDL_RenderFillRect(renderer, &rectangle);
 					}
 				}
-
+				
 				for (int i = 0; i < 9; i++){
 					for (int j = 0; j < 9; j++){
 						if(board[i][j] != '.'){
@@ -185,30 +213,6 @@ int main( int argc, char* args[] ){
 				if(delta < desiredDelta) SDL_Delay(desiredDelta - delta);
 			}
 	}
-	close(window, renderer);
+	close();
 	return 0;
-}
-
-bool initSDL(SDL_Window* &window, SDL_Renderer* &renderer, SDL_Surface* &screenSurface, std::string name){
-	if( SDL_Init( SDL_INIT_VIDEO ) < 0 ){
-		return false;
-	}else{
-		window = SDL_CreateWindow( name.c_str(), SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, SCREEN_WIDTH, SCREEN_HEIGHT, SDL_WINDOW_SHOWN );
-		if( window == NULL ) return false;
-		renderer = SDL_CreateRenderer( window , -1, SDL_RENDERER_ACCELERATED );
-		screenSurface = SDL_GetWindowSurface( window );
-	}
-	return true;
-}
-
-void close(SDL_Window* &window, SDL_Renderer* renderer){
-	for(int i=0; i<surfaces.size(); i++){
-		SDL_FreeSurface(surfaces[i]);
-		surfaces[i] = NULL;
-	}
-	SDL_DestroyRenderer( renderer );
-    SDL_DestroyWindow( window );
-    window = NULL;
-	TTF_Quit();
-    SDL_Quit();
 }
