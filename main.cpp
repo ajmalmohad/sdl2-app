@@ -21,6 +21,7 @@ SDL_Renderer* renderer = NULL;
 SDL_Surface* screenSurface = NULL;
 std::vector<SDL_Surface*> surfaces;
 std::vector<SDL_Texture*> textures;
+bool solved = false;
 
 std::vector<std::vector<char>> board {
 	{'5','3','.','.','7','.','.','.','.'},
@@ -34,13 +35,7 @@ std::vector<std::vector<char>> board {
 	{'.','.','.','.','8','.','.','7','9'}
 };
 std::vector<std::vector<bool>> defined(10, std::vector<bool>(10, false)); 
-std::vector<std::vector<bool>> error(10, std::vector<bool>(10, false)); 
 std::vector<std::vector<SDL_Rect>> boxes(10, std::vector<SDL_Rect>(10));
-std::vector<std::vector<SDL_Rect>> errorboxes(10, std::vector<SDL_Rect>(10));
-
-std::vector<std::vector<bool>> rows(10, std::vector<bool>(10, false));
-std::vector<std::vector<bool>> cols(10, std::vector<bool>(10, false));
-std::vector<std::vector<bool>> subgrid(10, std::vector<bool>(10, false));
 
 std::vector<Uint8> selectColor = {127, 127, 127};
 struct {
@@ -75,9 +70,62 @@ void close(){
     SDL_Quit();
 }
 
-void setErrors(){
+bool solve(std::vector<std::vector<char>>& board, int i, int j,
+        std::vector<std::vector<bool>>& rows, std::vector<std::vector<bool>>& cols, 
+        std::vector<std::vector<bool>>& boxes){
+            if(i == 9){
+                return true;
+            }
+            if(board[i][j]=='.'){
+                for(int a=1; a<=9; a++){
 
+                    if(rows[i][a] || cols[j][a] || boxes[((i/3)*3)+j/3][a]) continue;
+                    rows[i][a] = true;
+                    cols[j][a] = true;
+                    boxes[((i/3)*3)+j/3][a] = true;
+
+                    board[i][j] = a + '0';
+                    bool ans;
+                    if(j<8) ans = solve(board, i, j+1, rows, cols, boxes);
+                    else if(j==8) ans = solve(board, i+1, 0, rows, cols, boxes);
+                    if(ans) return true;
+                    board[i][j] = '.';
+
+                    rows[i][a] = false;
+                    cols[j][a] = false;
+                    boxes[((i/3)*3)+j/3][a] = false;
+
+                }
+            }else{
+                bool ans;
+                if(j<8) ans = solve(board, i, j+1, rows, cols, boxes);
+                else if(j==8) ans = solve(board, i+1, 0, rows, cols, boxes);
+                if(ans) return true;
+            }
+        return false;
+    }
+
+void solveSudoku(std::vector<std::vector<char>>& board) {
+	std::vector<std::vector<bool>> rows(10, std::vector<bool>(10, false));
+	std::vector<std::vector<bool>> cols(10, std::vector<bool>(10, false));
+	std::vector<std::vector<bool>> boxes(10, std::vector<bool>(10, false));
+	for(int i=0; i<9; i++){
+		for(int j=0; j<9; j++){
+			if(board[i][j] != '.'){
+				int num = board[i][j] - '0';
+				rows[i][num] = true;
+				cols[j][num] = true;
+				boxes[((i/3)*3)+j/3][num] = true;
+			}
+		}
+    }
+    if(solved = solve(board, 0, 0, rows, cols, boxes)){
+		std::cout<<"Solved"<<"\n";
+	}else{
+		std::cout<<"Not Solvable"<<"\n";
+	}
 }
+
 
 void printBoard(){
 	for(auto row : board){
@@ -111,17 +159,6 @@ int main( int argc, char* args[] ){
 			rectangle.h = GRID_SIZE+1;
 			bool isRunning = true; 
 
-			for(int i=0; i<9; i++){
-				for(int j=0; j<9; j++){
-					if(board[i][j] != '.'){
-						int num = board[i][j] - '0';
-						rows[i][num] = true;
-						cols[j][num] = true;
-						subgrid[((i/3)*3)+j/3][num] = true;
-					}
-				}
-			}
-
 			for (int i = 0; i < 9; i++){
 				for (int j = 0; j < 9; j++){
 					SDL_Rect rect;
@@ -130,17 +167,6 @@ int main( int argc, char* args[] ){
 					rect.w = FONT_SIZE;
 					rect.h = FONT_SIZE;
 					boxes[i][j] = rect;
-				}
-			}
-
-			for (int i = 0; i < 9; i++){
-				for (int j = 0; j < 9; j++){
-					SDL_Rect rect;
-					rect.y = i*GRID_SIZE;
-					rect.x = j*GRID_SIZE;
-					rect.w = GRID_SIZE;
-					rect.h = GRID_SIZE;
-					errorboxes[i][j] = rect;
 				}
 			}
 			
@@ -168,7 +194,10 @@ int main( int argc, char* args[] ){
 						isRunning = false; 
 						break;
 					case SDL_TEXTINPUT:
-						if(
+						if(e.text.text[0] == 's'){
+							if(!solved) solveSudoku(board);
+							std::cout<<solved<<"\n";
+						}else if(
 							selectedPosition.x != -1 && selectedPosition.y != -1 &&
 							!defined[selectedPosition.x][selectedPosition.y] && 
 							isdigit(e.text.text[0]) && e.text.text[0] - '0' != 0
@@ -178,11 +207,6 @@ int main( int argc, char* args[] ){
 							int j = selectedPosition.y;
 
 							board[i][j] = e.text.text[0];
-							rows[i][num] = true;
-							cols[j][num] = true;
-							subgrid[((i/3)*3)+j/3][num] = true;
-
-							setErrors();
 							printBoard();
 						}
 						break;
@@ -207,16 +231,6 @@ int main( int argc, char* args[] ){
 					}
 					SDL_RenderDrawLine(renderer,0, i, 540, i);
 					SDL_RenderDrawLine(renderer,i, 0, i, 540);
-				}
-
-				for (int i = 0; i < 9; i++){
-					for (int j = 0; j < 9; j++){
-						if(error[i][j]){
-							std::cout<<i<<" "<<j<<"\n";
-							SDL_SetRenderDrawColor(renderer,200, 0, 0, 1);
-							SDL_RenderFillRect(renderer, &errorboxes[i][j]);
-						}
-					}
 				}
 
 				// Selected Position box render
