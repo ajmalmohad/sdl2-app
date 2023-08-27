@@ -48,12 +48,15 @@ std::vector<std::vector<char>> board {
 };
 std::vector<std::vector<bool>> defined(10, std::vector<bool>(10, false)); 
 std::vector<std::vector<SDL_Rect>> boxes(10, std::vector<SDL_Rect>(10));
+std::vector<std::vector<SDL_Rect>> bigboxes(10, std::vector<SDL_Rect>(10));
 
 std::vector<Uint8> selectColor = {127, 127, 127};
 struct {
 	int x = -1;
 	int y = -1;
 } selectedPosition;
+
+std::vector<std::vector<bool>> errors(10, std::vector<bool>(10, false));
 
 bool initSDL(std::string name){
 	if( SDL_Init( SDL_INIT_VIDEO ) < 0 ) return false;
@@ -138,7 +141,6 @@ void solveSudoku(std::vector<std::vector<char>>& board) {
 	}
 }
 
-
 void printBoard(){
 	for(auto row : board){
 		for(char num : row){
@@ -153,6 +155,9 @@ int main( int argc, char* args[] ){
 	TTF_Init();
 
 	TTF_Font* Swansea = TTF_OpenFont("Swansea.ttf", FONT_SIZE);
+
+	SDL_Texture *Tile = SDL_CreateTexture(renderer, SDL_PIXELFORMAT_RGBA8888,
+                        SDL_TEXTUREACCESS_STREAMING, 8, 8);
 
 	for (int i = 0; i < 9; i++){
 		for (int j = 0; j < 9; j++){
@@ -179,6 +184,17 @@ int main( int argc, char* args[] ){
 					rect.w = FONT_SIZE;
 					rect.h = FONT_SIZE;
 					boxes[i][j] = rect;
+				}
+			}
+
+			for (int i = 0; i < 9; i++){
+				for (int j = 0; j < 9; j++){
+					SDL_Rect rect;
+					rect.y = i*GRID_SIZE;
+					rect.x = j*GRID_SIZE;
+					rect.w = GRID_SIZE;
+					rect.h = GRID_SIZE;
+					bigboxes[i][j] = rect;
 				}
 			}
 			
@@ -247,6 +263,16 @@ int main( int argc, char* args[] ){
 					}
 					SDL_RenderDrawLine(renderer,0, i, 540, i);
 					SDL_RenderDrawLine(renderer,i, 0, i, 540);
+				}
+
+				// Render Error Columns
+				for (int i = 0; i < 9; i++){
+					for (int j = 0; j < 9; j++){
+						if(errors[i][j]){
+							SDL_SetRenderDrawColor(renderer,200, 0, 0, 1);
+							SDL_RenderFillRect(renderer, &bigboxes[i][j]);
+						}
+					}
 				}
 
 				// Selected Position box render
