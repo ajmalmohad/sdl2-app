@@ -253,6 +253,11 @@ int main( int argc, char* args[] ){
 							std::cout<<solved<<"\n";
 						}else if(e.text.text[0] == 'r'){
 							board = initial;
+							for (int i = 0; i < 9; i++){
+								for (int j = 0; j < 9; j++){
+									errors[i][j] = false;
+								}
+							}
 							solved = false;
 							std::cout<<"Reset"<<"\n";
 						}else if(
