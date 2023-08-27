@@ -295,7 +295,8 @@ int main( int argc, char* args[] ){
 				for (int i = 0; i < 9; i++){
 					for (int j = 0; j < 9; j++){
 						if(errors[i][j]){
-							SDL_SetRenderDrawColor(renderer,200, 0, 0, 1);
+							if(defined[i][j]) SDL_SetRenderDrawColor(renderer,200, 200, 0, 1);
+							else SDL_SetRenderDrawColor(renderer,200, 0, 0, 1);
 							SDL_RenderFillRect(renderer, &bigboxes[i][j]);
 						}
 					}
