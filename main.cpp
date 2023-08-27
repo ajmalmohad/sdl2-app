@@ -141,6 +141,32 @@ void solveSudoku(std::vector<std::vector<char>>& board) {
 	}
 }
 
+void calculateErrors(){
+	std::vector<std::vector<int>> rows(10, std::vector<int>(10, 0));
+	std::vector<std::vector<int>> cols(10, std::vector<int>(10, 0));
+	std::vector<std::vector<int>> boxes(10, std::vector<int>(10, 0));
+	for(int i=0; i<9; i++){
+		for(int j=0; j<9; j++){
+			errors[i][j] = false;
+			if(board[i][j] != '.'){
+				int num = board[i][j] - '0';
+				rows[i][num] += 1;
+				cols[j][num] += 1;
+				boxes[((i/3)*3)+j/3][num] += 1;
+			}
+		}
+	}
+
+	for(int i=0; i<9; i++){
+		for(int j=0; j<9; j++){
+			if(board[i][j] != '.'){
+				int num = board[i][j] - '0';
+				if(rows[i][num] > 1 || cols[j][num] > 1 || boxes[((i/3)*3)+j/3][num] > 1) errors[i][j] = true;
+			}
+		}
+	}
+}
+
 void printBoard(){
 	for(auto row : board){
 		for(char num : row){
@@ -237,8 +263,8 @@ int main( int argc, char* args[] ){
 							int num = e.text.text[0] - '0';
 							int i = selectedPosition.x;
 							int j = selectedPosition.y;
-
 							board[i][j] = e.text.text[0];
+							calculateErrors();
 							printBoard();
 						}
 						break;
