@@ -23,6 +23,18 @@ std::vector<SDL_Surface*> surfaces;
 std::vector<SDL_Texture*> textures;
 bool solved = false;
 
+std::vector<std::vector<char>> initial {
+	{'5','3','.','.','7','.','.','.','.'},
+	{'6','.','.','1','9','5','.','.','.'},
+	{'.','9','8','.','.','.','.','6','.'},
+	{'8','.','.','.','6','.','.','.','3'},
+	{'4','.','.','8','.','3','.','.','1'},
+	{'7','.','.','.','2','.','.','.','6'},
+	{'.','6','.','.','.','.','2','8','.'},
+	{'.','.','.','4','1','9','.','.','5'},
+	{'.','.','.','.','8','.','.','7','9'}
+};
+
 std::vector<std::vector<char>> board {
 	{'5','3','.','.','7','.','.','.','.'},
 	{'6','.','.','1','9','5','.','.','.'},
@@ -197,6 +209,10 @@ int main( int argc, char* args[] ){
 						if(e.text.text[0] == 's'){
 							if(!solved) solveSudoku(board);
 							std::cout<<solved<<"\n";
+						}else if(e.text.text[0] == 'r'){
+							board = initial;
+							solved = false;
+							std::cout<<"Reset"<<"\n";
 						}else if(
 							selectedPosition.x != -1 && selectedPosition.y != -1 &&
 							!defined[selectedPosition.x][selectedPosition.y] && 
